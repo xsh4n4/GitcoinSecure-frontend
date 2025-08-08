@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ======= GLOBAL RESETS ======= */
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #e2e8f0; /* secondary-200 */
+  background-color: #0f172a; /* secondary-900 */
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Reset default box styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  outline: none;
+  box-shadow: none;
+}
+
+/* Preserve keyboard accessibility */
+*:focus-visible {
+  outline: 2px solid #3b82f6; /* primary-500 */
+  outline-offset: 2px;
+}
+
+/* Optional — disable for all cases */
+.no-focus-outline:focus,
+.no-focus-outline:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* ======= PAGE LAYOUT ======= */
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: #0f172a; /* secondary-900 */
+  color: #e2e8f0; /* secondary-200 */
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* ======= COMPONENTS ======= */
+
+/* Links */
+a {
+  color: #60a5fa; /* primary-400 */
+  text-decoration: none;
+}
+a:hover {
+  color: #3b82f6; /* primary-500 */
+}
+
+/* Selected button override */
+button.selected,
+button.selected:hover {
+  color: white !important;
+}
+
+/* Dropdown options in dark mode */
+select, option {
+  color: black !important;
+  background-color: white !important;
+}
+
+/* Padding wrapper utility */
+.container-padding {
+  @apply px-4 sm:px-6 lg:px-12;
+}
+
+/* Uniform cards */
+.card-uniform {
+  @apply w-full sm:w-[300px] h-[200px] bg-secondary-800 rounded-xl p-4 border border-secondary-700 flex flex-col justify-between;
+}
+
+/* Soft hover glow */
+.glow-hover:hover {
+  @apply shadow-md shadow-primary-500/20 transition duration-200;
+}
+
+/* ======= LIGHT MODE SUPPORT ======= */
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #1e293b; /* secondary-800 */
+    background-color: #f8fafc; /* secondary-50 */
+  }
+
+  a:hover {
+    color: #2563eb; /* primary-600 */
+  }
+
+  button {
+    background-color: #f1f5f9; /* secondary-100 */
+  }
+}
