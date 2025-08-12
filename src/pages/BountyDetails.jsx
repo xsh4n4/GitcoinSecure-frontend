@@ -1,7 +1,9 @@
+
+
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAccount } from 'wagmi';
-import { Calendar, Coins, Users, AlertTriangle, CheckCircle, Github, Globe, Send, ArrowLeft, FileText, Shield, Mail } from 'lucide-react';
+import { Calendar, Coins, Users, AlertTriangle, CheckCircle, Github, Globe, Send, ArrowLeft, FileText, Shield, Mail, ExternalLink, BookOpen } from 'lucide-react';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { useBounties } from '../hooks/useBounties';
 
@@ -14,7 +16,7 @@ const BountyDetails = () => {
   const bounty = getBountyById(id);
 
   const getSeverityColor = (severity) => {
-    switch (severity) {
+    switch (severity?.toLowerCase()) {
       case 'critical': return 'text-red-400 bg-red-400/10';
       case 'high': return 'text-orange-400 bg-orange-400/10';
       case 'medium': return 'text-yellow-400 bg-yellow-400/10';
@@ -30,6 +32,20 @@ const BountyDetails = () => {
       case 'expired': return 'text-red-400 bg-red-400/10';
       default: return 'text-gray-400 bg-gray-400/10';
     }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Not specified';
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch {
+      return dateString;
+    }
+  };
+
+  const parseResources = (resourcesString) => {
+    if (!resourcesString) return [];
+    return resourcesString.split(',').map(url => url.trim()).filter(url => url);
   };
 
   if (isLoading) {
@@ -90,78 +106,95 @@ const BountyDetails = () => {
             {/* Bounty Info */}
             <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
               <div className="flex flex-wrap items-center gap-3 mb-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getSeverityColor(bounty.severity)}`}>
-                  {bounty.severity}
-                </span>
+                {bounty.severity && (
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getSeverityColor(bounty.severity)}`}>
+                    {bounty.severity.charAt(0).toUpperCase() + bounty.severity.slice(1)}
+                  </span>
+                )}
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(bounty.status)}`}>
-                  {bounty.status}
+                  {bounty.status.charAt(0).toUpperCase() + bounty.status.slice(1)}
                 </span>
-                <span className="text-gray-400 text-sm">Category: {bounty.category}</span>
               </div>
 
               <h2 className="text-xl font-semibold text-white mb-4">Description</h2>
-              <p className="text-whiteleading-relaxed">{bounty.description}</p>
+              <p className="text-white leading-relaxed">{bounty.description}</p>
             </div>
 
             {/* Scope Section */}
-            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
-              <div className="flex items-center space-x-2 mb-4">
-                <FileText className="h-5 w-5 text-blue-400" />
-                <h2 className="text-xl font-semibold text-white">Scope</h2>
+            {bounty.scope && (
+              <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+                <div className="flex items-center space-x-2 mb-4">
+                  <FileText className="h-5 w-5 text-blue-400" />
+                  <h2 className="text-xl font-semibold text-white">Scope</h2>
+                </div>
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                  <p className="text-white whitespace-pre-wrap leading-relaxed">
+                    {bounty.scope}
+                  </p>
+                </div>
               </div>
-              <div className="bg-blue-500/30 rounded-lg p-4">
-                <p className="text-white whitespace-pre-wrap">
-                  {bounty.scope}
-                </p>
-              </div>
-            </div>
+            )}
 
-            {/* Rules Section */}
-            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
-              <div className="flex items-center space-x-2 mb-4">
-                <Shield className="h-5 w-5 text-blue-400" />
-                <h2 className="text-xl font-semibold text-white">Rules & Guidelines</h2>
+            {/* Rules & Guidelines Section */}
+            {bounty.rules && (
+              <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+                <div className="flex items-center space-x-2 mb-4">
+                  <Shield className="h-5 w-5 text-blue-400" />
+                  <h2 className="text-xl font-semibold text-white">Rules & Guidelines</h2>
+                </div>
+                <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
+                  <p className="text-white whitespace-pre-wrap leading-relaxed">
+                    {bounty.rules}
+                  </p>
+                </div>
               </div>
-              <div className="bg-blue-500/30 rounded-lg p-4">
-                <p className="text-white whitespace-pre-wrap">
-                  {bounty.rules}
-                </p>
-              </div>
-            </div>
+            )}
 
             {/* Resources Section */}
-            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
-              <h2 className="text-xl font-semibold text-white mb-4">Resources</h2>
-              <div className="space-y-4">
-                {bounty.github && (
-                  <div className="flex items-center space-x-4 p-3 bg-blue-500/30 rounded-lg">
-                    <Github className="h-5 w-5 text-gray-400 flex-shrink-0" />
-                    <a
-                      href={bounty.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-white hover:text-blue-300 break-all"
-                    >
-                      {bounty.github}
-                    </a>
-                  </div>
-                )}
-                
-                {bounty.website && (
-                  <div className="flex items-center space-x-4 p-3 bg-blue-500/30 rounded-lg">
-                    <Globe className="h-5 w-5 text-white flex-shrink-0" />
-                    <a
-                      href={bounty.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-white hover:text-blue-300 break-all"
-                    >
-                      {bounty.website}
-                    </a>
-                  </div>
-                )}
+            {bounty.resources && (
+              <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+                <div className="flex items-center space-x-2 mb-4">
+                  <BookOpen className="h-5 w-5 text-blue-400" />
+                  <h2 className="text-xl font-semibold text-white">Resources</h2>
+                </div>
+                <div className="space-y-3">
+                  {parseResources(bounty.resources).map((resource, index) => (
+                    <div key={index} className="flex items-center space-x-3 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                      <ExternalLink className="h-4 w-4 text-green-400 flex-shrink-0" />
+                      <a
+                        href={resource}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-white hover:text-green-300 break-all transition-colors"
+                      >
+                        {resource}
+                      </a>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Website Section */}
+            {bounty.website && (
+              <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+                <div className="flex items-center space-x-2 mb-4">
+                  <Globe className="h-5 w-5 text-blue-400" />
+                  <h2 className="text-xl font-semibold text-white">Project Website</h2>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+                  <Globe className="h-4 w-4 text-purple-400 flex-shrink-0" />
+                  <a
+                    href={bounty.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white hover:text-purple-300 break-all transition-colors"
+                  >
+                    {bounty.website}
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -206,7 +239,7 @@ const BountyDetails = () => {
                     <Calendar className="h-4 w-4 text-gray-400" />
                     <span className="text-gray-300">Deadline</span>
                   </div>
-                  <span className="text-white">{bounty.deadline}</span>
+                  <span className="text-white">{formatDate(bounty.deadline)}</span>
                 </div>
                 
                 <div className="flex items-center justify-between">
@@ -220,33 +253,45 @@ const BountyDetails = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Calendar className="h-4 w-4 text-gray-400" />
-                    <span className="text-gray-300">Created</span>
+                    <span className="text-gray-300">End Date</span>
                   </div>
-                  <span className="text-white">{new Date(bounty.createdAt).toLocaleDateString()}</span>
+                  <span className="text-white">{formatDate(bounty.endDate)}</span>
                 </div>
+
+                {bounty.severity && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <AlertTriangle className="h-4 w-4 text-gray-400" />
+                      <span className="text-gray-300">Severity</span>
+                    </div>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${getSeverityColor(bounty.severity)}`}>
+                      {bounty.severity.charAt(0).toUpperCase() + bounty.severity.slice(1)}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Contact Information */}
-            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
-              <h3 className="text-lg font-semibold text-white mb-4">Contact</h3>
-              
-              {bounty.email && (
-                <div className="flex items-center space-x-3 p-3 bg-blue-500/30 rounded-lg">
-                  <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            {bounty.contact && (
+              <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-4">Contact</h3>
+                
+                <div className="flex items-center space-x-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                  <Mail className="h-4 w-4 text-blue-400 flex-shrink-0" />
                   <a
-                    href={`mailto:${bounty.email}`}
-                    className="text-white hover:text-blue-300 break-all"
+                    href={`mailto:${bounty.contact}`}
+                    className="text-white hover:text-blue-300 break-all transition-colors"
                   >
-                    {bounty.email}
+                    {bounty.contact}
                   </a>
                 </div>
-              )}
-              
-              <div className="mt-4 text-sm text-gray-400">
-                <p>For questions about this bounty, please contact the project maintainers.</p>
+                
+                <div className="mt-4 text-sm text-gray-400">
+                  <p>For questions about this bounty, please contact the project maintainers.</p>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Guidelines */}
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-6">
@@ -267,3 +312,4 @@ const BountyDetails = () => {
 };
 
 export default BountyDetails;
+
